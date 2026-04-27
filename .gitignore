@@ -1,10 +1,12 @@
-# Python cache and build output
+# Python bytecode and caches
 __pycache__/
 *.py[cod]
 *$py.class
-*.egg-info/
-build/
-dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 .venv/
@@ -12,40 +14,34 @@ venv/
 env/
 ENV/
 
-# Local environment and secrets
+# Local deployment and secrets
 .env
 .env.*
 !.env.example
 
-# Flask/runtime files
-instance/
-*.log
-
-# SQLite/local application data
+# Runtime SQLite databases
 *.db
 *.sqlite
 *.sqlite3
-First_Responders_Checking_System/data/*.db
+First_Responders_Checking_System/data/
+!First_Responders_Checking_System/data/.gitkeep
 
-# Test and tooling caches
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
+# Logs and runtime output
+*.log
+logs/
 
-# IDE/editor files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Windows launcher build outputs and temporary files
+*.exe
+*.dll
+*.pdb
+*.TMP
+*.tmp
+bin/
+obj/
 
-# OS files
+# OS and editor files
 .DS_Store
 Thumbs.db
-
-# Windows desktop launcher build artifacts
-First_Responders_Checking_System/desktop_launcher/bin/
-First_Responders_Checking_System/desktop_launcher/obj/
-First_Responders_Checking_System/desktop_launcher/*.exe
-First_Responders_Checking_System/desktop_launcher/*.msi
+desktop.ini
+.vscode/
+.idea/
