@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Site Check In</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">First Responders Site Register</p>
+                <h1>Check in and check out</h1>
+                <p class="lede">
+                    Current status rolls over at midnight and open screens refresh automatically.
+                </p>
+            </div>
+            <div class="hero-panel">
+                <div class="top-link-row">
+                    <a class="history-link" href="{{ url_for('admin') }}">Admin</a>
+                </div>
+                <div class="metric">
+                    <span>Now</span>
+                    <strong>{{ now.strftime('%d %b %Y %H:%M') }}</strong>
+                </div>
+                <div class="metric">
+                    <span>Currently on site</span>
+                    <strong>{{ on_site_count }}</strong>
+                </div>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <section class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Current roster</h2>
+                <p>Sign people in or out here. Registration and event history are in the admin area.</p>
+            </div>
+
+            <div class="signed-in-summary">
+                <div class="summary-header">
+                    <strong>Signed in now</strong>
+                    <span>{{ on_site_count }} on site</span>
+                </div>
+                {% if signed_in_people %}
+                    <div class="summary-chips">
+                        {% for person in signed_in_people %}
+                            <span class="summary-chip">{{ person['name'] }} · {{ person['radio_number'] }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-state summary-empty">Nobody is currently signed in.</p>
+                {% endif %}
+            </div>
+
+            {% if people %}
+                <div class="card-grid">
+                    {% for person in people %}
+                        <article class="person-card {{ 'on-site' if person['effective_on_site'] else 'off-site' }}">
+                            <div class="person-top">
+                                <div>
+                                    <h3>{{ person['name'] }}</h3>
+                                    <p>Radio {{ person['radio_number'] }}</p>
+                                </div>
+                                <span class="status-pill">
+                                    {{ 'On site' if person['effective_on_site'] else 'Off site' }}
+                                </span>
+                            </div>
+                            <p class="last-action">
+                                {% if person['last_action_at'] %}
+                                    Last update: {{ person['last_action_at'].replace('T', ' ')[:16] }}
+                                {% else %}
+                                    No actions recorded yet.
+                                {% endif %}
+                            </p>
+                            <form class="action-form" action="{{ url_for('record_action', person_id=person['id']) }}" method="post">
+                                <label>
+                                    <span>Comment</span>
+                                    <input type="text" name="comments" placeholder="Optional note">
+                                </label>
+                                <div class="actions">
+                                    <button type="submit" name="action" value="check_in" class="checkin">Sign in</button>
+                                    <button type="submit" name="action" value="check_out" class="checkout">Sign out</button>
+                                </div>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No people registered yet.</p>
+            {% endif %}
+        </section>
+
+    </main>
+    <script>
+        (() => {
+            const pageDate = "{{ current_date }}";
+            const timezone = "Europe/London";
+            const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+                timeZone: timezone,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            });
+
+            const currentAppDate = () => {
+                const parts = dateFormatter.formatToParts(new Date());
+                const year = parts.find((part) => part.type === "year").value;
+                const month = parts.find((part) => part.type === "month").value;
+                const day = parts.find((part) => part.type === "day").value;
+                return `${year}-${month}-${day}`;
+            };
+
+            const checkForDateRollover = () => {
+                if (currentAppDate() !== pageDate) {
+                    window.location.reload();
+                }
+            };
+
+            window.setInterval(checkForDateRollover, 10000);
+        })();
+    </script>
+</body>
+</html>

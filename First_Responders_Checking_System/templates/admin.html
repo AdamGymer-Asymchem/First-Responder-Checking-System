@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Admin Area</p>
+                <h1>Manage people and review history.</h1>
+                <p class="lede">
+                    This area contains registration, database details, and recent event reporting.
+                </p>
+            </div>
+            <div class="hero-panel">
+                <div class="top-link-row">
+                    <a class="history-link secondary-link" href="{{ url_for('index') }}">Back to roster</a>
+                </div>
+                <div class="metric">
+                    <span>Now</span>
+                    <strong>{{ now.strftime('%d %b %Y %H:%M') }}</strong>
+                </div>
+                <div class="metric">
+                    <span>Database</span>
+                    <strong>{{ database_path }}</strong>
+                </div>
+                <a class="history-link" href="{{ url_for('history') }}">View full history</a>
+                <a class="history-link secondary-link" href="{{ url_for('export_history_csv') }}">Export CSV</a>
+                <form action="{{ url_for('admin_logout') }}" method="post">
+                    <button type="submit" class="checkout full-width">Sign out of admin</button>
+                </form>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <section class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Register a person</h2>
+                <p>Add people once, then they appear on the public roster.</p>
+            </div>
+            <form class="register-form" action="{{ url_for('create_person') }}" method="post">
+                <label>
+                    <span>Name</span>
+                    <input type="text" name="name" placeholder="Jordan Smith" required>
+                </label>
+                <label>
+                    <span>Radio number</span>
+                    <input type="text" name="radio_number" placeholder="R-17" required>
+                </label>
+                <button type="submit">Add person</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Registered people</h2>
+                <p>Current list available on the public roster.</p>
+            </div>
+            {% if people %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Radio</th>
+                                <th>Status</th>
+                                <th>Last update</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in people %}
+                                <tr>
+                                    <td>{{ person['name'] }}</td>
+                                    <td>{{ person['radio_number'] }}</td>
+                                    <td>{{ 'On site' if person['effective_on_site'] else 'Off site' }}</td>
+                                    <td>{{ person['last_action_at'].replace('T', ' ')[:19] if person['last_action_at'] else '-' }}</td>
+                                    <td>
+                                        <form action="{{ url_for('delete_person', person_id=person['id']) }}" method="post" onsubmit="return confirm('Delete {{ person['name'] }} and all their history?');">
+                                            <button type="submit" class="danger-button">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-state">No people registered yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Recent events</h2>
+                <p>Latest 15 check-ins, check-outs, and overnight resets.</p>
+            </div>
+            {% if recent_events %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Name</th>
+                                <th>Radio</th>
+                                <th>Event</th>
+                                <th>Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in recent_events %}
+                                <tr>
+                                    <td>{{ event['event_time'].replace('T', ' ')[:19] }}</td>
+                                    <td>{{ event['name'] }}</td>
+                                    <td>{{ event['radio_number'] }}</td>
+                                    <td>{{ event['event_type'].replace('_', ' ') }}</td>
+                                    <td>{{ event['comments'] or '-' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-state">No events yet.</p>
+            {% endif %}
+        </section>
+    </main>
+    <script>
+        (() => {
+            const pageDate = "{{ current_date }}";
+            const timezone = "Europe/London";
+            const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+                timeZone: timezone,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            });
+
+            const currentAppDate = () => {
+                const parts = dateFormatter.formatToParts(new Date());
+                const year = parts.find((part) => part.type === "year").value;
+                const month = parts.find((part) => part.type === "month").value;
+                const day = parts.find((part) => part.type === "day").value;
+                return `${year}-${month}-${day}`;
+            };
+
+            const checkForDateRollover = () => {
+                if (currentAppDate() !== pageDate) {
+                    window.location.reload();
+                }
+            };
+
+            window.setInterval(checkForDateRollover, 10000);
+        })();
+    </script>
+</body>
+</html>

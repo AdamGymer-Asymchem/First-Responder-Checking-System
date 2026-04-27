@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="shell login-shell">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <section class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="panel login-panel">
+            <p class="eyebrow">Admin</p>
+            <h1>Enter password</h1>
+            <form class="action-form" action="{{ url_for('admin_login') }}" method="post">
+                <label>
+                    <span>Password</span>
+                    <input type="password" name="password" required autofocus>
+                </label>
+                <button type="submit" class="checkin">Open admin</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

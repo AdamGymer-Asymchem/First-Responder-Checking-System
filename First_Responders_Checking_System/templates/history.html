@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Event History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="shell history-shell">
+        <section class="hero compact">
+            <div>
+                <p class="eyebrow">Stored History</p>
+                <h1>Last 500 site register events.</h1>
+            </div>
+            <div class="hero-panel">
+                <a class="history-link" href="{{ url_for('index') }}">Back to register</a>
+                <a class="history-link secondary-link" href="{{ url_for('export_history_csv') }}">Export CSV</a>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Radio</th>
+                            <th>Event</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                            <tr>
+                                <td>{{ event['event_time'].replace('T', ' ')[:19] }}</td>
+                                <td>{{ event['event_date'] }}</td>
+                                <td>{{ event['name'] }}</td>
+                                <td>{{ event['radio_number'] }}</td>
+                                <td>{{ event['event_type'].replace('_', ' ') }}</td>
+                                <td>{{ event['comments'] or '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
