@@ -1,0 +1,47 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local deployment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+First_Responders_Checking_System/data/
+!First_Responders_Checking_System/data/.gitkeep
+
+# Logs and runtime output
+*.log
+logs/
+
+# Windows launcher build outputs and temporary files
+*.exe
+*.dll
+*.pdb
+*.TMP
+*.tmp
+bin/
+obj/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
